@@ -1,0 +1,1 @@
+# javascript_course_project_sem_1
