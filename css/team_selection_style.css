@@ -1,0 +1,50 @@
+body::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)), url(../assets/main_bg.jpg);
+    background-attachment: fixed;
+    background-size: auto 100%;
+    background-position: center;
+    z-index: -1;
+}
+
+body {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.team-selection-container {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+}
+
+.model {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 45%;
+}
+
+.model-viewer {
+    height: 80vh;
+    transition: transform 0.3s ease-in-out;
+}
+
+.model-viewer:hover {
+    transform: scale(1.1);
+}
+
+.model-type {
+    margin-top: 10px;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: red;
+}

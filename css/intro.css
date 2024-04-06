@@ -1,0 +1,6 @@
+body {
+    background-image: url(../assets/main_bg.jpg);
+    background-attachment: fixed;
+    background-size: auto 100%;
+    background-position: center;
+}
