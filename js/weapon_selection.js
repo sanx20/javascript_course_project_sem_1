@@ -1,69 +1,57 @@
-// {
-//     "id": "skin-65604",
-//     "name": "Desert Eagle | Urban DDPAT",
-//     "description": "As expensive as it is powerful, the Desert Eagle is an iconic pistol that is difficult to master but surprisingly accurate at long range. It has been painted using a Digital Disruptive Pattern (DDPAT) hydrographic.\\n\\n<i>By the time you're close enough to notice the pixels it's already too late</i>",
-//     "weapon": {
-//         "id": "weapon_deagle",
-//         "name": "Desert Eagle"
-//     },
-//     "category": {
-//         "id": "csgo_inventory_weapon_category_pistols",
-//         "name": "Pistols"
-//     },
-//     "pattern": {
-//         "id": "hy_ddpat_urb",
-//         "name": "Urban DDPAT"
-//     },
-//     "min_float": 0.06,
-//     "max_float": 0.8,
-//     "rarity": {
-//         "id": "rarity_uncommon_weapon",
-//         "name": "Industrial Grade",
-//         "color": "#5e98d9"
-//     },
-//     "stattrak": false,
-//     "souvenir": true,
-//     "paint_index": "17",
-//     "team": {
-//         "id": "both",
-//         "name": "Both Teams"
-//     },
-//     "image": "https://raw.githubusercontent.com/ByMykel/counter-strike-image-tracker/main/static/panorama/images/econ/default_generated/weapon_deagle_hy_ddpat_urb_light_png.png"
-// },
-
 class Weapon {
-    constructor(id, name, description, weapondId, weaponName, categoryId, categoryName, rarity, team, image) {
-        if (id !== '' && name !== '' && team !== '' && image !== '') {
+    constructor(id, name, description, image, categoryName) {
+        if (id !== '' && name !== '' && description !== '' && image !== '') {
             this._id = id;
             this._name = name;
             this._description = description === '' ? 'Not Found' : description;
-            this._weaponId = weapondId === '' ? 'Not Found' : weapondId;
-            this._weaponName = weaponName === '' ? 'Not Found' : weaponName;
-            this._categoryId = categoryId === '' ? 'Not Found' : categoryId;
-            this._category = categoryName === '' ? 'Not Found' : categoryName;
             this._price = this.getPrice(categoryName);
-            this._rarity = rarity === '' ? 'Not Found' : rarity;
-            this._team = team;
             this._image = image;
+            this._category = categoryName;
         }
     }
 
     getPrice(weaponCategory) {
+        let min, max;
         if (weaponCategory.toLowerCase() === 'pistols') {
-            return Math.floor(Math.random() * (700 - 200 + 1) + 200);
+            min = 200;
+            max = 700;
         } else if (weaponCategory.toLowerCase() === 'smgs') {
-            return Math.floor(Math.random() * (1500 - 1000 + 1) + 1000);
+            min = 1000;
+            max = 1500;
         } else if (weaponCategory.toLowerCase() === 'rifles') {
-            return Math.floor(Math.random() * (3500 - 1500 + 1) + 1500);
+            min = 1500;
+            max = 3500;
         } else if (weaponCategory.toLowerCase() === 'heavy') {
-            return Math.floor(Math.random() * (4500 - 2500 + 1) + 2500);
+            min = 2500;
+            max = 4500;
         } else if (weaponCategory.toLowerCase() === 'knives' || weaponCategory.toLowerCase() === 'gloves') {
-            return Math.floor(Math.random() * (500 - 100 + 1) + 100);
+            min = 100;
+            max = 500;
         } else {
-            return Math.floor(Math.random() * (1000 - 500 + 1) + 500);
+            min = 500;
+            max = 1000;
         }
+        return Math.round((Math.random() * (max - min) + min) / 50) * 50;
     }
 }
+
+class CategoryWrapper {
+    constructor(weaponWrapper, categoryName) {
+        this._weaponWrapper = weaponWrapper;
+        this._categoryName = categoryName;
+
+    }
+}
+
+class WeaponWrapper {
+    constructor(weapons, weaponId, weaponName) {
+        this._weapons = weapons;
+        this._weaponId = weaponId;
+        this._weaponName = weaponName;
+    }
+}
+
+
 
 const getWeaponsUrl = 'https://bymykel.github.io/CSGO-API/api/en/skins.json';
 
@@ -77,45 +65,104 @@ async function getWeapons() {
     }
 }
 
-function createWeapon(data) {
-    const weapons = [];
+
+function createWeapon(data, selectedTeam) {
+    const CategoryWrappers = [];
+    let selectedTeamId = selectedTeam === 'Terrorist' ? 'terrorists' : 'counter-terroists';
+
     for (let i = 0; i < data.length; i++) {
-        const weapon = new Weapon(data[i].id, data[i].name, data[i].description, data[i].weapon.id, data[i].weapon.name, data[i].category.id, data[i].category.name ?? 'Not Found', data[i].rarity.name, data[i].team.name, data[i].image);
-        weapons.push(weapon);
-        // // I want to skip if weapon id is already in the array
-        // if (!(weapons.some(weapon => weapon._weaponId === data[i].weapon.id))) {
-        //     const weapon = new Weapon(data[i].id, data[i].name, data[i].description, data[i].weapon.id, data[i].weapon.name, data[i].category.id, data[i].category.name ?? 'Not Found', data[i].rarity.name, data[i].team.name, data[i].image);
-        //     weapons.push(weapon);
-        // }
+        if (data[i].team.id.toLowerCase() === 'both' || data[i].team.id.toLowerCase() === selectedTeamId) {
+            if (data[i].id !== null && data[i].name !== null && data[i].description !== null && data[i].image !== null && data[i].category.name !== null && data[i].weapon.weapon_id !== null) {
+                const weapon = new Weapon(data[i].id, data[i].name, data[i].description, data[i].image, data[i].category.name);
+                const existingCategoryWrapperIndex = CategoryWrappers.findIndex(wrapper => wrapper._categoryName === data[i].category.name);
+                if (existingCategoryWrapperIndex !== -1) {
+                    const existingWeaponWrapperIndex = CategoryWrappers[existingCategoryWrapperIndex]._weaponWrapper.findIndex(weaponWrapper => weaponWrapper._weaponId === data[i].weapon.id);
+                    if (existingWeaponWrapperIndex !== -1) {
+                        CategoryWrappers[existingCategoryWrapperIndex]._weaponWrapper[existingWeaponWrapperIndex]._weapons.push(weapon);
+                    } else {
+                        CategoryWrappers[existingCategoryWrapperIndex]._weaponWrapper.push(new WeaponWrapper([weapon], data[i].weapon.id, data[i].weapon.name));
+                    }
+                } else {
+                    const weaponWrapper = new WeaponWrapper([weapon], data[i].weapon.id, data[i].weapon.name);
+                    CategoryWrappers.push(new CategoryWrapper([weaponWrapper], data[i].category.name));
+                }
+            }
+        }
     }
-    return weapons;
+    return CategoryWrappers;
 }
 
-function displayWeapons(weapons) {
-    const weaponsContainer = document.querySelector('.weapons-container');
-    weaponsContainer.style.display = 'grid';
-    weaponsContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(300px, 1fr))';
-    weaponsContainer.style.gap = '20px';
-    weapons.forEach(weapon => {
-        const weaponCard = document.createElement('div');
-        weaponCard.classList.add('weapon-card');
-        weaponCard.innerHTML = `
-            <img src="${weapon._image}" alt="${weapon._name}" class="weapon-image">
-            <div class="weapon-info">
-                <h3 class="weapon-name">${weapon._name}</h3>
-                <p class="weapon-description">${weapon._description}</p>
-                <p class="weapon-category text-uppercase">${weapon._category}</p>
-                <p class="weapon-price">Price: $${weapon._price}</p>
-                <p class="weapon-team text-uppercase">${weapon._team}</p>
-            </div>
-        `;
-        if (weaponCard !== null) {
-            weaponsContainer.appendChild(weaponCard);
-        }
+function displayCategoryWrappers(categoryWrappers) {
+    const container = document.querySelector('.category-wrapper-container');
+    container.innerHTML = '';
+
+
+    categoryWrappers.forEach((categoryWrapper) => {
+        const categoryListItem = document.createElement('li');
+        categoryListItem.textContent = categoryWrapper._categoryName;
+        categoryListItem.addEventListener('click', () => {
+            const weaponContainer = document.querySelector('.weapon-container');
+            weaponContainer.innerHTML = '';
+            displayWeaponWrappers(categoryWrapper._weaponWrapper);
+        });
+        container.appendChild(categoryListItem);
     });
 }
 
+function displayWeaponWrappers(weaponWrappers) {
+    const container = document.querySelector('.weapon-wrapper-container');
+    container.innerHTML = '';
+
+    weaponWrappers.forEach((weaponWrapper) => {
+        const weaponWrapperElement = document.createElement('div');
+        weaponWrapperElement.textContent = weaponWrapper._weaponName;
+        weaponWrapperElement.addEventListener('click', () => {
+            displayWeapons(weaponWrapper._weapons);
+        });
+        container.appendChild(weaponWrapperElement);
+    });
+}
+
+function displayWeapons(weapons) {
+    const container = document.querySelector('.weapon-container');
+    container.innerHTML = '';
+
+    weapons.forEach((weapon) => {
+        const weaponElement = document.createElement('div');
+        weaponElement.classList.add('weapon');
+
+        const weaponNameElement = document.createElement('h2');
+        weaponNameElement.textContent = weapon._name;
+        weaponElement.appendChild(weaponNameElement);
+
+        const weaponDescriptionElement = document.createElement('p');
+        weaponDescriptionElement.textContent = weapon._description;
+        weaponElement.appendChild(weaponDescriptionElement);
+
+        const weaponPriceElement = document.createElement('p');
+        weaponPriceElement.textContent = `Price: ${weapon._price}`;
+        weaponElement.appendChild(weaponPriceElement);
+
+        const weaponImageElement = document.createElement('img');
+        weaponImageElement.src = weapon._image;
+        weaponElement.appendChild(weaponImageElement);
+
+        container.appendChild(weaponElement);
+    });
+}
+
+
 getWeapons().then(data => {
-    const weapons = createWeapon(data);
-    displayWeapons(weapons);
+    const selectedTeam = sessionStorage.getItem('selectedTeam');
+    if (selectedTeam === 'Terrorist') {
+        document.body.classList.add('terrorist');
+    } else if (selectedTeam === 'Counter-Terrorist') {
+        document.body.classList.add('counter-terrorist');
+    }
+    var weapons = createWeapon(data, selectedTeam);
+    displayCategoryWrappers(weapons);
+    // const weaponsContainer = document.querySelector('.weapons-container');
+    // weaponsContainer.innerHTML = '';
+    // const filteredWeapons = weapons._weapons.filter(weapon => weapon && weapon._category && weapon._category.toLowerCase() === category.toLowerCase());
+    // displayWeapons(filteredWeapons);
 });

@@ -1,0 +1,133 @@
+body {
+    margin: 0;
+    padding: 0;
+    background-attachment: fixed;
+    background-size: cover;
+    background-position: center;
+    color: #fff;
+    padding-top: 5rem;
+    background-color: #f4f4f4;
+    overflow-x: hidden;
+}
+
+body.terrorist {
+    background-image: url(../assets/t_bg.jpeg);
+}
+
+body.counter-terrorist {
+    background-image: url(../assets/ct_bg.jpg);
+}
+
+.category-wrapper-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 200px;
+    overflow: auto;
+    margin: 20px;
+    padding: 20px;
+    background-color: #2c3e50;
+    border-radius: 5px;
+    color: #f5f5f5;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.category-wrapper-container h2,
+.weapon-wrapper-container h2 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+}
+
+.category-wrapper-container li {
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+    position: relative;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.category-wrapper-container li:hover {
+    background-color: #34495e;
+}
+
+.weapon-wrapper-container {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    left: 240px;
+    /* adjust as needed */
+    position: relative;
+    top: 0;
+    width: calc(100% - 220px);
+    margin: 20px;
+    padding: 20px;
+    background-color: #2c3e50;
+    border-radius: 5px;
+    color: #f5f5f5;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.weapon-container {
+    display: flex;
+    flex-wrap: wrap;
+    left: 220px;
+    justify-content: space-between;
+    padding: 1rem;
+    margin-top: 50px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    box-sizing: border-box;
+    border-radius: 5px;
+    overflow: auto;
+}
+
+.weapon {
+    flex: 1 0 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 10px;
+    box-sizing: border-box;
+    border: 1px solid #000;
+    padding: 10px;
+    overflow: hidden;
+}
+
+.weapon img {
+    max-width: 100%;
+    height: auto;
+}
+
+.weapon:hover {
+    transform: scale(1.1);
+    box-shadow: 0 10px 20px 0 rgba(0, 0, 0, 0.2);
+    background-color: #e8e8e8;
+}
+
+.weapon:active {
+    transform: scale(0.95);
+    box-shadow: 0 5px 10px 0 rgba(0, 0, 0, 0.2);
+}
+
+.weapon h4 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.weapon p {
+    margin: 0;
+    font-size: 1rem;
+}
+
+@media (max-width: 600px) {
+    .weapon {
+        flex: 1 0 150px;
+    }
+}

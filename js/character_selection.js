@@ -20,6 +20,17 @@ class Character {
 
 const getAgentsUrl = 'https://bymykel.github.io/CSGO-API/api/en/agents.json';
 
+const audio = new Audio('./audios/character_selection.mp3');
+
+audio.muted = true;
+audio.loop = true;
+
+window.addEventListener('load', () => {
+    audio.muted = false;
+    audio.play();
+});
+
+
 async function getAgents() {
     try {
         const response = await fetch(getAgentsUrl);
@@ -74,64 +85,39 @@ function displayCharacters(agents) {
 
             selectedAgent = agents.find(agent => agent._id === this.id);
             this.classList.add('selected');
+
+            createHeader(selectedAgent._team, agents);
         });
     });
 };
 
 let playerName = null;
 
-function createHeader(selectedTeam) {
-    const header = document.createElement('div');
-    header.classList.add('header-style');
+function createHeader(selectedTeam, agents) {
+    let playerName = window.prompt("Enter player name");
 
-    const headerText = document.createElement('div');
-    headerText.textContent = `Choose an agent - ${selectedTeam}`;
-    header.appendChild(headerText);
+    if (!selectedAgent) {
+        alert('Please select an agent first.');
+        return;
+    }
 
-    const nameInput = document.createElement('input');
-    nameInput.type = 'text';
-    nameInput.placeholder = 'Enter player name';
-    nameInput.classList.add('input-style');
-    header.appendChild(nameInput);
+    if (playerName === null || playerName.trim() === '') {
+        alert('Please enter a player name.');
+        return;
+    }
 
-    const submitButton = document.createElement('button');
-    submitButton.textContent = 'Submit';
-    submitButton.classList.add('button-style');
-    header.appendChild(submitButton);
+    const words = playerName.split(' ');
+    if (words.length > 2 || playerName.length > 20) {
+        alert('The player name must not exceed more than 2 words and the letter count must not exceed 20.');
+        return;
+    }
 
-    const inputGroup = document.createElement('div');
-    inputGroup.appendChild(nameInput);
-    inputGroup.appendChild(submitButton);
-    header.appendChild(inputGroup);
-
-    document.body.insertBefore(header, document.body.firstChild);
-
-    submitButton.addEventListener('click', function () {
-        if (!selectedAgent) {
-            alert('Please select an agent first.');
-            return;
-        }
-
-        const name = nameInput.value.trim();
-        if (name === '') {
-            alert('Please enter a player name.');
-            return;
-        }
-
-        const words = name.split(' ');
-        if (words.length > 2 || name.length > 20) {
-            alert('The player name must not exceed more than 2 words and the letter count must not exceed 20.');
-            return;
-        }
-
-        playerName = name;
-        localStorage.setItem('playerName', playerName);
-        localStorage.setItem('selectedAgent', JSON.stringify(selectedAgent))
-        selectThreeRandomAgents(agents);
-        window.location.href = 'weapon_selection.html';
-    });
+    playerName = playerName.trim();
+    sessionStorage.setItem('playerName', playerName);
+    sessionStorage.setItem('selectedAgent', JSON.stringify(selectedAgent))
+    selectThreeRandomAgents(agents);
+    window.location.href = 'weapon_selection.html';
 }
-
 function selectThreeRandomAgents(agents) {
     const selectedAgents = [];
     for (let i = 0; i < 3; i++) {
@@ -139,20 +125,18 @@ function selectThreeRandomAgents(agents) {
         selectedAgents.push(agents[randomIndex]);
         agents.splice(randomIndex, 1);
     }
-    localStorage.setItem('selectedAgentOne', JSON.stringify(selectedAgents[0]));
-    localStorage.setItem('selectedAgentTwo', JSON.stringify(selectedAgents[1]));
-    localStorage.setItem('selectedAgentThree', JSON.stringify(selectedAgents[2]));
+    sessionStorage.setItem('selectedAgentOne', JSON.stringify(selectedAgents[0]));
+    sessionStorage.setItem('selectedAgentTwo', JSON.stringify(selectedAgents[1]));
+    sessionStorage.setItem('selectedAgentThree', JSON.stringify(selectedAgents[2]));
 }
 
 getAgents().then(data => {
     let selectedTeam = sessionStorage.getItem('selectedTeam');
     const agents = createCharacter(data, selectedTeam);
-    createHeader(selectedTeam);
     displayCharacters(agents);
-
     if (selectedTeam === 'Terrorist') {
-        document.body.style.backgroundImage = 'url(../assets/t_bg.jpg)';
+        document.body.classList.add('terrorist');
     } else if (selectedTeam === 'Counter-Terrorist') {
-        document.body.style.backgroundImage = 'url(../assets/ct_bg.jpg)';
+        document.body.classList.add('counter-terrorist');
     }
 });

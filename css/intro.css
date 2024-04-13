@@ -4,3 +4,47 @@ body {
     background-size: auto 100%;
     background-position: center;
 }
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+.center-screen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.logo {
+    width: 200px;
+    opacity: 0;
+    animation: fadeIn 1s ease-in-out 1s forwards;
+}
+
+.start-button {
+    margin-top: 10px;
+    padding: 5px 40px;
+    font-size: 1.2em;
+    border: none;
+    border-radius: 5px;
+    background-color: #FFA500;
+    color: white;
+    opacity: 0;
+    animation: fadeIn 1s ease-in-out 2s forwards;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    cursor: pointer;
+    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.start-button:hover {
+    background-color: #FF4500;
+    transform: scale(1.05);
+}
