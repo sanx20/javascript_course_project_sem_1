@@ -55,72 +55,76 @@ class WeaponWrapper {
 // let weaponPicker = new WeaponPicker(CategoryWrappers);
 // weaponPicker.autoPickWeapons();
 
-class WeaponPicker {
-    constructor(categoryWrappers) {
-        this.balance = 9000;
-        updateBalanceDisplay(this.balance);
-        this.categoryWrappers = categoryWrappers;
-        this.selectedWeapons = {
-            pistols: null,
-            smgs: null,
-            rifles: null,
-            heavy: null,
-            knives: null,
-            gloves: null,
-        };
+
+let selectedWeapons = {
+    'pistols': null,
+    'smgs': null,
+    'rifles': null,
+    'heavy': null,
+    'knives': null,
+    'gloves': null
+};
+let balance = 9000;
+
+function pickWeapon(weapon) {
+    const selectedWeapon = selectedWeapons[weapon._category.toLowerCase()];
+    if (selectedWeapon) {
+        balance += selectedWeapon._price;
     }
-
-    selectWeapon(weapon) {
-        window.location.href = 'character_overview.html';
-
-        // if (!weapon || !weapon._price || !weapon._category) {
-        //     console.error('Invalid weapon object');
-        //     return;
-        // }
-
-        // if (weapon._price > this.balance) {
-        //     alert('Not enough balance to select this weapon. Please select another weapon.');
-        //     return;
-        // }
-
-        // if (this.selectedWeapons[weapon._category]) {
-        //     this.balance += this.selectedWeapons[weapon._category]._price;
-        // }
-
-        // this.balance -= weapon._price;
-        // this.selectedWeapons[weapon._category] = weapon;
+    if (balance - weapon._price < 0) {
+        alert('Balance is not enough to buy this weapon. Please selecr another weapon.');
+        return;
     }
+    selectedWeapons[weapon._category.toLowerCase()] = weapon;
+    balance -= weapon._price;
+    updateBalance();
+}
+function updateBalance() {
+    const balanceElement = document.querySelector('#balance');
+    balanceElement.textContent = `Balance: $${balance}`;
+}
 
-    autoPickWeapons() {
-        for (let category in this.selectedWeapons) {
-            let weaponsInCategory = this.getWeaponsInCategory(category);
-            let affordableWeapons = weaponsInCategory.filter(weapon => weapon._price <= this.balance);
+function isWeaponSelected(weapon) {
+    return Object.values(selectedWeapons).some(selectedWeapon => selectedWeapon && selectedWeapon._id === weapon._id);
+}
 
-            if (affordableWeapons.length > 0) {
-                let selectedWeapon = this.selectCheapestWeapon(affordableWeapons);
-                this.selectedWeapons[category] = selectedWeapon;
-                this.balance -= selectedWeapon._price;
-            } else {
-                console.log(`No affordable weapons in category: ${category}`);
+function isWeaponSelectedFromSameWeaponWrapper(weapon) {
+    return Object.values(selectedWeapons).some(selectedWeapon => selectedWeapon && selectedWeapon._id === weapon._id && selectedWeapon._category === weapon._category);
+}
+
+function autoSelectWeapons(categoryWrapper) {
+    let selectedWeapons = {
+        'pistols': null,
+        'smgs': null,
+        'rifles': null,
+        'heavy': null,
+        'knives': null,
+        'gloves': null
+    };
+
+    let totalCost = 0;
+
+    for (let category in selectedWeapons) {
+        let categoryObject = categoryWrapper.find(wrapper => wrapper._categoryName.toLowerCase() === category);
+        if (categoryObject) {
+            for (let weaponWrapper of categoryObject._weaponWrapper) {
+                let sortedWeapons = weaponWrapper._weapons.sort((a, b) => a._price - b._price);
+                for (let weapon of sortedWeapons) {
+                    if (weapon._price + totalCost <= 9000) {
+                        totalCost += weapon._price;
+                        selectedWeapons[category] = weapon;
+                        break;
+                    }
+                }
+                if (selectedWeapons[category] !== null) {
+                    break;
+                }
             }
         }
     }
 
-    getWeaponsInCategory(category) {
-        let categoryWrapper = this.categoryWrappers.find(wrapper => wrapper._categoryName.toLowerCase() === category);
-        return categoryWrapper ? categoryWrapper._weaponWrapper.flatMap(wrapper => wrapper._weapons) : [];
-    }
-
-    selectCheapestWeapon(weapons) {
-        return weapons.reduce((cheapest, weapon) => weapon._price < cheapest._price ? weapon : cheapest);
-    }
+    return selectedWeapons;
 }
-
-function updateBalanceDisplay(balance) {
-    const balanceElement = document.querySelector('#balance');
-    balanceElement.textContent = `Balance: ${balance}`;
-}
-
 const getWeaponsUrl = 'https://bymykel.github.io/CSGO-API/api/en/skins.json';
 
 // const audio = new Audio('./audios/weapon_selection.mp3');
@@ -176,12 +180,16 @@ function displayCategoryWrappers(categoryWrappers) {
 
 
     categoryWrappers.forEach((categoryWrapper) => {
-        const categoryListItem = document.createElement('li');
+        const categoryListItem = document.createElement('div');
+        categoryListItem.classList.add('weapon-category');
         categoryListItem.textContent = categoryWrapper._categoryName;
         categoryListItem.addEventListener('click', () => {
+
             const weaponContainer = document.querySelector('.weapon-container');
             weaponContainer.innerHTML = '';
             displayWeaponWrappers(categoryWrapper._weaponWrapper);
+            document.querySelectorAll('.weapon-category').forEach(item => item.classList.remove('selected-category'));
+            categoryListItem.classList.add('selected-category');
         });
         container.appendChild(categoryListItem);
     });
@@ -193,14 +201,25 @@ function displayWeaponWrappers(weaponWrappers) {
 
     weaponWrappers.forEach((weaponWrapper) => {
         const weaponWrapperElement = document.createElement('div');
+        weaponWrapperElement.classList.add('weapon-wrapper');
         weaponWrapperElement.textContent = weaponWrapper._weaponName;
+
         weaponWrapperElement.addEventListener('click', () => {
+            // Clear the weapon container and display the weapons for the selected wrapper
+            const weaponContainer = document.querySelector('.weapon-container');
+            weaponContainer.innerHTML = '';
             displayWeapons(weaponWrapper._weapons);
+
+            // Remove 'selected-weapon-wrapper' class from all weapon wrappers
+            document.querySelectorAll('.weapon-wrapper').forEach(item => item.classList.remove('selected-weapon-wrapper'));
+
+            // Add 'selected-weapon-wrapper' class to the clicked weapon wrapper
+            weaponWrapperElement.classList.add('selected-weapon-wrapper');
         });
+
         container.appendChild(weaponWrapperElement);
     });
 }
-
 function displayWeapons(weapons) {
     const container = document.querySelector('.weapon-container');
     container.innerHTML = '';
@@ -208,6 +227,7 @@ function displayWeapons(weapons) {
     weapons.forEach((weapon) => {
         const weaponElement = document.createElement('div');
         weaponElement.classList.add('weapon');
+        weaponElement.dataset.category = weapon._category;
 
         const weaponNameElement = document.createElement('h2');
         weaponNameElement.textContent = weapon._name;
@@ -225,22 +245,30 @@ function displayWeapons(weapons) {
         weaponImageElement.src = weapon._image;
         weaponElement.appendChild(weaponImageElement);
 
-        const weaponPicker = new WeaponPicker(weapons);
-
         container.appendChild(weaponElement);
+
+        if (isWeaponSelected(weapon)) {
+            weaponElement.classList.add('selected-weapon');
+        }
+
         weaponElement.addEventListener('click', () => {
-            sessionStorage.setItem('selectedPistol', JSON.stringify(weapon));
-            sessionStorage.setItem('selectedSMG', JSON.stringify(weapon));
-            sessionStorage.setItem('selectedRifle', JSON.stringify(weapon));
-            sessionStorage.setItem('selectedHeavy', JSON.stringify(weapon));
-            sessionStorage.setItem('selectedKnive', JSON.stringify(weapon));
-            sessionStorage.setItem('selectedGlove', JSON.stringify(weapon));
-            weaponPicker.selectWeapon(weapon);
+            if (isWeaponSelectedFromSameWeaponWrapper(weapon._category)) {
+                const selectedWeapon = container.querySelector('.selected-weapon');
+                if (selectedWeapon) {
+                    selectedWeapon.classList.remove('selected-weapon');
+                }
+            }
+
+            pickWeapon(weapon);
+
+            document.querySelectorAll(`.weapon[data-category="${weapon._category}"]`).forEach((w) => {
+                w.classList.remove('selected-weapon');
+            });
+
+            weaponElement.classList.add('selected-weapon');
         });
     });
 }
-
-
 getWeapons().then(data => {
     const selectedTeam = sessionStorage.getItem('selectedTeam');
     if (selectedTeam === 'Terrorist') {
