@@ -52,8 +52,86 @@ class WeaponWrapper {
 }
 
 
+// let weaponPicker = new WeaponPicker(CategoryWrappers);
+// weaponPicker.autoPickWeapons();
+
+class WeaponPicker {
+    constructor(categoryWrappers) {
+        this.balance = 9000;
+        updateBalanceDisplay(this.balance);
+        this.categoryWrappers = categoryWrappers;
+        this.selectedWeapons = {
+            pistols: null,
+            smgs: null,
+            rifles: null,
+            heavy: null,
+            knives: null,
+            gloves: null,
+        };
+    }
+
+    selectWeapon(weapon) {
+        window.location.href = 'character_overview.html';
+
+        // if (!weapon || !weapon._price || !weapon._category) {
+        //     console.error('Invalid weapon object');
+        //     return;
+        // }
+
+        // if (weapon._price > this.balance) {
+        //     alert('Not enough balance to select this weapon. Please select another weapon.');
+        //     return;
+        // }
+
+        // if (this.selectedWeapons[weapon._category]) {
+        //     this.balance += this.selectedWeapons[weapon._category]._price;
+        // }
+
+        // this.balance -= weapon._price;
+        // this.selectedWeapons[weapon._category] = weapon;
+    }
+
+    autoPickWeapons() {
+        for (let category in this.selectedWeapons) {
+            let weaponsInCategory = this.getWeaponsInCategory(category);
+            let affordableWeapons = weaponsInCategory.filter(weapon => weapon._price <= this.balance);
+
+            if (affordableWeapons.length > 0) {
+                let selectedWeapon = this.selectCheapestWeapon(affordableWeapons);
+                this.selectedWeapons[category] = selectedWeapon;
+                this.balance -= selectedWeapon._price;
+            } else {
+                console.log(`No affordable weapons in category: ${category}`);
+            }
+        }
+    }
+
+    getWeaponsInCategory(category) {
+        let categoryWrapper = this.categoryWrappers.find(wrapper => wrapper._categoryName.toLowerCase() === category);
+        return categoryWrapper ? categoryWrapper._weaponWrapper.flatMap(wrapper => wrapper._weapons) : [];
+    }
+
+    selectCheapestWeapon(weapons) {
+        return weapons.reduce((cheapest, weapon) => weapon._price < cheapest._price ? weapon : cheapest);
+    }
+}
+
+function updateBalanceDisplay(balance) {
+    const balanceElement = document.querySelector('#balance');
+    balanceElement.textContent = `Balance: ${balance}`;
+}
 
 const getWeaponsUrl = 'https://bymykel.github.io/CSGO-API/api/en/skins.json';
+
+// const audio = new Audio('./audios/weapon_selection.mp3');
+
+// audio.muted = true;
+// audio.loop = true;
+
+// window.addEventListener('load', () => {
+//     audio.muted = false;
+//     audio.play();
+// });
 
 async function getWeapons() {
     try {
@@ -147,7 +225,18 @@ function displayWeapons(weapons) {
         weaponImageElement.src = weapon._image;
         weaponElement.appendChild(weaponImageElement);
 
+        const weaponPicker = new WeaponPicker(weapons);
+
         container.appendChild(weaponElement);
+        weaponElement.addEventListener('click', () => {
+            sessionStorage.setItem('selectedPistol', JSON.stringify(weapon));
+            sessionStorage.setItem('selectedSMG', JSON.stringify(weapon));
+            sessionStorage.setItem('selectedRifle', JSON.stringify(weapon));
+            sessionStorage.setItem('selectedHeavy', JSON.stringify(weapon));
+            sessionStorage.setItem('selectedKnive', JSON.stringify(weapon));
+            sessionStorage.setItem('selectedGlove', JSON.stringify(weapon));
+            weaponPicker.selectWeapon(weapon);
+        });
     });
 }
 

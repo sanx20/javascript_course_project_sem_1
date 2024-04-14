@@ -5,9 +5,10 @@ body {
     background-size: cover;
     background-position: center;
     color: #fff;
-    padding-top: 5rem;
     background-color: #f4f4f4;
     overflow-x: hidden;
+    display: flex;
+    flex-direction: row;
 }
 
 body.terrorist {
@@ -19,11 +20,12 @@ body.counter-terrorist {
 }
 
 .category-wrapper-container {
-    position: fixed;
+    position: relative;
     top: 0;
-    left: 0;
     height: 100%;
-    width: 200px;
+    flex: 25%;
+    max-height: 500px;
+    /* adjust this value as needed */
     overflow: auto;
     margin: 20px;
     padding: 20px;
@@ -54,15 +56,20 @@ body.counter-terrorist {
     background-color: #34495e;
 }
 
+
+.weapons-section {
+    display: flex;
+    flex-direction: column;
+    flex: 75%;
+}
+
 .weapon-wrapper-container {
     display: flex;
     flex-direction: row;
     gap: 20px;
-    left: 240px;
-    /* adjust as needed */
+    flex: 75%;
     position: relative;
     top: 0;
-    width: calc(100% - 220px);
     margin: 20px;
     padding: 20px;
     background-color: #2c3e50;
@@ -74,19 +81,18 @@ body.counter-terrorist {
 .weapon-container {
     display: flex;
     flex-wrap: wrap;
-    left: 220px;
     justify-content: space-between;
+    flex: 75%;
     padding: 1rem;
     margin-top: 50px;
     background-color: rgba(255, 255, 255, 0.1);
     color: #fff;
     box-sizing: border-box;
     border-radius: 5px;
-    overflow: auto;
 }
 
 .weapon {
-    flex: 1 0 200px;
+    flex: 0 0 calc(33.33% - 20px);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -128,6 +134,6 @@ body.counter-terrorist {
 
 @media (max-width: 600px) {
     .weapon {
-        flex: 1 0 150px;
+        flex: 0 0 100%;
     }
 }

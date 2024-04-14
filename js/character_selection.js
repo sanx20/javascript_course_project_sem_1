@@ -86,14 +86,17 @@ function displayCharacters(agents) {
             selectedAgent = agents.find(agent => agent._id === this.id);
             this.classList.add('selected');
 
-            createHeader(selectedAgent._team, agents);
+
+            setTimeout(function () {
+                getPlayerName(agents);
+            }, 350);
         });
     });
 };
 
 let playerName = null;
 
-function createHeader(selectedTeam, agents) {
+function getPlayerName(agents) {
     let playerName = window.prompt("Enter player name");
 
     if (!selectedAgent) {
@@ -118,6 +121,7 @@ function createHeader(selectedTeam, agents) {
     selectThreeRandomAgents(agents);
     window.location.href = 'weapon_selection.html';
 }
+
 function selectThreeRandomAgents(agents) {
     const selectedAgents = [];
     for (let i = 0; i < 3; i++) {
